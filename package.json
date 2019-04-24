@@ -1,0 +1,22 @@
+{
+  "name": "hiway",
+  "version": "1.0.0",
+  "description": "Extract and copy all dependents.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "liajoy",
+  "license": "MIT",
+  "dependencies": {
+    "builtins": "^2.0.0",
+    "fs-extra": "^7.0.1",
+    "konan": "^1.2.1",
+    "minimist": "^1.2.0",
+    "progress": "^2.0.3",
+    "resolve": "^1.10.1"
+  },
+  "bin": {
+    "hiway": "./cli.js"
+  }
+}
