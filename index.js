@@ -9,7 +9,8 @@ const blackList = builtins
 const exts = ['.js', '.ts']
 const cwd = process.cwd()
 
-let depsPath = []
+const depsPath = []
+let topLevelFolder = ''
 
 function resolveExists(path) {
     if(fs.existsSync(path)) {
@@ -69,6 +70,13 @@ function findDeps(entry, dir) {
         const deps = konan(entryFile).strings
 
         if (!depsPath.includes(currentPath)) {
+            if(!topLevelFolder) {
+                topLevelFolder = currentPath
+            }
+            if(!new RegExp(topLevelFolder).test(currentPath)) {
+                topLevelFolder = path.resolve(topLevelFolder, '../')
+            }
+
             depsPath.push(currentPath)
 
             if (deps.length) {
@@ -85,32 +93,36 @@ async function copyDeps(outputDir) {
         total: depsPath.length,
         width: 50
     })
-    outputDir = path.resolve(cwd, outputDir)
 
     await Promise.all(
         depsPath.map(async depPath => {
-            const currentDir = outputDir + path.dirname(depPath).replace(cwd, '') + '/'
-            const basename = path.basename(depPath)
+            const outputPath = getPathInOutputDir(depPath, outputDir)
 
-            fs.mkdirpSync(currentDir)
-            await fs.copyFile(depPath, currentDir + basename)
+            fs.mkdirpSync(path.dirname(outputPath))
+            await fs.copyFile(depPath, outputPath)
 
             bar.tick()
         })
     )
 }
 
-async function extractDeps(entry, outputDir) {
+function getPathInOutputDir(depPath, outputDir) {
+    const basename = path.basename(depPath)
+    return outputDir + path.dirname(depPath).replace(topLevelFolder, '') + '/' + basename
+}
+
+async function extractDeps(entry, outputDir = '__output__') {
     if(entry) {
         console.log('analyzing...')
 
+        outputDir = path.resolve(cwd, outputDir)
         findDeps(entry, cwd)
 
         if (outputDir) {
             await copyDeps(outputDir)
         }
 
-        console.log('Done!')
+        console.log(`Done! Check ${getPathInOutputDir(path.resolve(cwd, entry), outputDir)}`)
     }
 
     return Promise.resolve(depsPath)
