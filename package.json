@@ -1,6 +1,6 @@
 {
   "name": "hiway",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Detect and extract dependents of a file.",
   "main": "index.js",
   "scripts": {
